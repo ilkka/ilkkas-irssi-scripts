@@ -31,7 +31,6 @@ sub check_and_annotate
 	my @keywords = split(/,/, Irssi::settings_get_str('urlcheck_keywords'));
 	my $witem = Irssi::window_item_find($target);
 	foreach my $url (@urls) {
-		Irssi::print("Checking ".$url);
 		my $content = get $url;
 		return unless defined $content;
 		my $matches;
