@@ -16,7 +16,7 @@ $VERSION = "0.1";
 	name => 'urlcheck',
 	description => 'Checks HTTP URL contents for keywords and annotates them',
 	license => 'GPLV2',
-	url => 'http://www.example.com',
+	url => 'http://github.com/ilkka/irssi-urlcheck',
 };
 
 Irssi::settings_add_bool('urlcheck', 'urlcheck_active', 1);
