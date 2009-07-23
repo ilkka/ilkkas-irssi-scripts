@@ -5,6 +5,7 @@ BEGIN { $ENV{HARNESS_ACTIVE} = 1 }
 
 use Irssi;
 use URI::Find::Rule;
+use LWP::Simple;
 
 use vars qw($VERSION %IRSSI);
 
@@ -18,21 +19,32 @@ $VERSION = "0.1";
 	url => 'http://www.example.com',
 };
 
+Irssi::settings_add_bool('urlcheck', 'urlcheck_active', 1);
 Irssi::settings_add_str('urlcheck', 'urlcheck_keywords', '');
 
 sub check_and_annotate
 {
 	my ($target, $data) = @_;
-	my @urls = URI::Find::Rule->scheme('http')->in($data);
+	return unless Irssi::settings_get_bool('urlcheck_active');
+	my @urls = URI::Find::Rule->scheme('http')->in($data, 1);
 	return unless (@urls);
 	my @keywords = split(/,/, Irssi::settings_get_str('urlcheck_keywords'));
 	my $witem = Irssi::window_item_find($target);
-	for my $url (@urls) {
-		foreach(@keywords) {
-			if ($data =~ $_) {
-				$witem->print("%R>>%n [$_]", MSGLEVEL_CLIENTCRAP);
+	foreach my $url (@urls) {
+		Irssi::print("Checking ".$url);
+		my $content = get $url;
+		return unless defined $content;
+		my $matches;
+		foreach my $kw (@keywords) {
+			if ($content =~ /$kw/i) {
+				if (defined $matches) {
+					$matches .= ', '.$kw;
+				} else {
+					$matches = $kw;
+				}
 			}
 		}
+		$witem->print("%R>>%n [$matches]", MSGLEVEL_CLIENTCRAP);
 	}
 }
 
