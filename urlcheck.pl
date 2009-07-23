@@ -6,7 +6,7 @@ BEGIN { $ENV{HARNESS_ACTIVE} = 1 }
 use Irssi;
 use URI::Find::Rule;
 
-use vars qw($VERSION %IRSSI)
+use vars qw($VERSION %IRSSI);
 
 $VERSION = "0.1";
 %IRSSI = {
@@ -22,14 +22,15 @@ Irssi::settings_add_str('urlcheck', 'urlcheck_keywords', '');
 
 sub check_and_annotate
 {
-	my ($data) = @_;
-	my @urls = URI::Find::Rule->in($data);
+	my ($target, $data) = @_;
+	my @urls = URI::Find::Rule->scheme('http')->in($data);
 	return unless (@urls);
 	my @keywords = split(/,/, Irssi::settings_get_str('urlcheck_keywords'));
+	my $witem = Irssi::window_item_find($target);
 	for my $url (@urls) {
 		foreach(@keywords) {
 			if ($data =~ $_) {
-				Irssi::print("[#{$_}]");
+				$witem->print("%R>>%n [$_]", MSGLEVEL_CLIENTCRAP);
 			}
 		}
 	}
@@ -38,19 +39,19 @@ sub check_and_annotate
 sub urlcheck_public
 {
 	my ($server, $data, $nick, $mask, $target) = @_;
-	check_and_annotate($data)
+	check_and_annotate($target, $data)
 }
 
 sub urlcheck_private
 {
 	my ($server, $data, $nick, $address) = @_;
-	check_and_annotate($data);
+	check_and_annotate($server->{'nick'}, $data);
 }
 
 sub urlcheck_own_public
 {
 	my ($server, $data, $target) = @_;
-	check_and_annotate($data);
+	check_and_annotate($target, $data);
 }
 
 Irssi::signal_add_last('message public', 'urlcheck_public');
