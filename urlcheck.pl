@@ -21,6 +21,7 @@ $VERSION = "0.1";
 
 Irssi::settings_add_bool('urlcheck', 'urlcheck_active', 1);
 Irssi::settings_add_str('urlcheck', 'urlcheck_keywords', '');
+Irssi::settings_add_str('urlcheck', 'urlcheck_blacklist', '');
 
 sub check_and_annotate
 {
@@ -29,8 +30,17 @@ sub check_and_annotate
 	my @urls = URI::Find::Rule->scheme('http')->in($data, 1);
 	return unless (@urls);
 	my @keywords = split(/,/, Irssi::settings_get_str('urlcheck_keywords'));
+	my @blacklist = split(/,/, Irssi::settings_get_str('urlcheck_blacklist'));
 	my $witem = Irssi::window_item_find($target);
-	foreach my $url (@urls) {
+URL:	foreach my $url (@urls) {
+		Irssi::print("Checking URL ".$url);
+		foreach my $block (@blacklist) {
+			Irssi::print("Checking against blacklist item ".$block);
+			if ($url =~ $block) {
+				Irssi::print("Matched -> next");
+				next URL;
+			}
+		}	
 		my $content = get $url;
 		return unless defined $content;
 		my $matches;
@@ -43,7 +53,7 @@ sub check_and_annotate
 				}
 			}
 		}
-		$witem->print("%R>>%n [$matches]", MSGLEVEL_CLIENTCRAP);
+		$witem->print("%R>>%n $url: $matches", MSGLEVEL_CLIENTCRAP) if defined $matches;
 	}
 }
 
