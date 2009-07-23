@@ -33,11 +33,8 @@ sub check_and_annotate
 	my @blacklist = split(/,/, Irssi::settings_get_str('urlcheck_blacklist'));
 	my $witem = Irssi::window_item_find($target);
 URL:	foreach my $url (@urls) {
-		Irssi::print("Checking URL ".$url);
 		foreach my $block (@blacklist) {
-			Irssi::print("Checking against blacklist item ".$block);
 			if ($url =~ $block) {
-				Irssi::print("Matched -> next");
 				next URL;
 			}
 		}	
