@@ -1,7 +1,7 @@
 # UrlCheck
 # Checks HTTP URL contents for words and annotates them so
 # you won't have to open stuff you don't need/want to see
-BEGIN { $ENV{HARNESS_ACTIVE} = 1 }
+use strict;
 
 use Irssi;
 use URI::Find::Rule;
